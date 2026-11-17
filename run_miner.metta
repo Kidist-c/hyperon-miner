@@ -92,9 +92,25 @@
 
 ;; EXAMPLE CONFIGURATION:
 !(pattern-miner &res &db &initpat 3 0 none none none True)
+;;
+;;
+!(match &res
+    (supportOf $pattern $support)
+    (let $fresh_pattern (replacev (replace $pattern))
+        (let $matches
+            (collapse (match &db $fresh_pattern $fresh_pattern))
+            (println! 
+    (CollectedPattern
+        $pattern
+        $support
+        $matches
+    )
+)
+        )
+    )
+)
 ;; --- 4. View Results ---
 !(get-atoms &res)
 
-!(println! "===== FINAL MINED RESULTS =====")
-!(get-atoms &res)
+
 
