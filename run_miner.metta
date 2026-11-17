@@ -51,7 +51,13 @@
 !(import! &db experiments/data/ugly_man_sodaDrinker)
 
 ;; Create a space for results
+;!(bind! &res (new-space))
+;; Create spaces
 !(bind! &res (new-space))
+!(bind! &initpat (new-space))
+!(bind! &cndpspace (new-space))
+!(bind! &aptrnspace (new-space))
+!(bind! &conjspace (new-space))
 
 
 ;; --- 3. Run Miner ---
@@ -85,9 +91,10 @@
 ;;                     False -> Stick to basic specialized patterns.
 
 ;; EXAMPLE CONFIGURATION:
-!(pattern-miner &res &db 3 0 none none none True)
-
-
+!(pattern-miner &res &db &initpat 3 0 none none none True)
 ;; --- 4. View Results ---
+!(get-atoms &res)
+
+!(println! "===== FINAL MINED RESULTS =====")
 !(get-atoms &res)
 
