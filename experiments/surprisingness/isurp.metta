@@ -14,7 +14,7 @@
 ;; boostrapping if necessary
 
 
-;; ==============================================================
+;; ==============================================================s
 ;; Function: pro-prob-wout-joint (Product Probability Without Joint Variables)
 ;; Purpose:  Computes the product probability of subpatterns while ignoring
 ;;           dependencies between joint variables (treats components as independent)
@@ -105,15 +105,13 @@
 ;; ==============================================================
 (= (ji-prob-est $partition $pattern $db $db_ratio) (let* 
 ( 
-  
+
   ($p (pro-prob-wout-joint $partition $db $db_ratio 1))
-  
   ($db-size (db_size $db))
 
   ; ($eq_prob (eq-prob-py $partition $pattern $db-size)) ; TODO: for fast excution use eq-prob-py
   
   ($eq_prob (eq-prob $partition $pattern $db))
-  
   )
   (* $p $eq_prob)
 
@@ -209,7 +207,7 @@
 ;; ==============================================================
 
 (=(ji_prob_est_interval $pattern $db $db_ratio) 
-   (let* (($gen-parts (partitions $pattern))  
+   (let* (($gen-parts (partitions-wout-pattern $pattern))  
    ($comp-ji (do-ji-prob $gen-parts $pattern $db $db_ratio))
   ($emin (min-atom $comp-ji))
   ($emax (max-atom $comp-ji))

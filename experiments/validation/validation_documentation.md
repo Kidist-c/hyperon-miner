@@ -98,6 +98,18 @@ Helper functions added:
 | Low Confidence (0.6, 0.2 vs 0.6, 0.2) | 0.000 | 0.085 | 0.000 | true |
 
 - Before fix: The old implementation yielded inconsistent JSD values compared to OpenCog, particularly on asymmetric or uncertain distributions.
+
+## 4. PeTTa Port Validation
+
+As part of the migration to the **PeTTa** interpreter, all validation tests were re-run to ensure consistency between the original MeTTa/Hyperon implementation and the PeTTa environment.
+
+### 4.1 Results
+The validation suite confirmed that:
+- **Output Consistency**: The PeTTa interpreter produced identical outputs to the reference MeTTa implementation for all key algorithms (JSD, Surprisingness, Frequent Mining).
+- **Correctness**: Key logic handling distribution calculations and pattern matching functioned as expected.
+
+The validation files can be run using the provided `run.sh` script to verify these results locally.
+
 - After fix: With the new Beta-distribution-based approach, Hyperon now produces JSD values that align with OpenCog Classic results.
 - Alignment status: Confirmed equivalence within numerical tolerance.
 
@@ -218,3 +230,30 @@ remove_useless_clause is a critical component in the Hyperon Pattern Miner. It r
     2. Constant clauses are removed.
     3. Redundant subpatterns are removed.
 
+### 3.6 Validation of frequent pattern miner as a whole
+
+#### Background
+
+The frequent pattern miner is the main component of the pattern miner. It mines frequent patterns from the atomspace. Accurate mining of frequent patterns is essential for downstream calculations such as pattern ranking and surprisingness evaluation.
+
+#### Issues in Previous Implementation
+
+- Abstract patterns were discarded after specilized but in the classic miner implementation they are kept as mined patterns and get passed for the next steps.
+- patterns that have the same value for the nodes were being given different values in the specializations
+- patterns that have depth and the depth has nodes with the same value were not being mined correctly.
+
+#### Changes Introduced (Validation-driven Refinement)
+
+- kept the abstract patterns after specialization
+- fixed the issue of patterns that have the same value for the nodes
+- fixed the issue of patterns that have depth and the depth has nodes with the same value
+
+did the above for both the functional and chainer based implementations.
+#### Validation Outcome
+
+- Before fix: 
+    1. patterns like (Inheritance $x $y) were discarded after being specialized.
+    2. patterns like (Inheritance A A) and (Inheritance (link A A) (link A A))... were being given different values in the specializations.
+- After fix: With the new implementation, the above issues are fixed. and there are no patterns being missed.
+
+Due to the speed problem caused by this change it is kept as version two of pattern miner.

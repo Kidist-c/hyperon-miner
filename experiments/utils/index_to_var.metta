@@ -2,50 +2,64 @@
 (: Z Nat)
 (: S (-> Nat Nat))
 
-
 (= (debruijn2num Z) 0)
 
 (= (debruijn2num (S $k)) (+ 1 (debruijn2num $k)))
 
 (= (fromNum $n) (if (<= $n 0) Z (S (fromNum (- $n 1)))))
 
-(= (make_var1 $x) (let $v  (make-var "var" $x)  $v))
+(= (make_var) $x)
 
+(= (find_val $history $val)
+    (if (== $history ())
+        ()
+        (let* (
+                (($head $value) (car-atom $history))
+                ($tail (cdr-atom $history))
+            )
+            (if (== $head $val)
+                $value
+                (find_val $tail $val)
+            )
+        )
+    )
+)
 
-
-
-(= (generate $x $space)
+(= (replacev $pattern)
+    (if (== $pattern ())
+        ()
     (let* (
-        (true (println! (in generate $space)))
-        ($num (eval (debruijn2num $x)))
-        (true (println! (in dev $num)))
-        ($result   (eval (unify $space ($num $var)  $var (make_var1 $num))) )
-        (true (println! (in res $result)))
-        ($result2   (eval (unify $space ($num $var)  yes No)) )
-        (true (println! (in res $result2)))
-        ($dummy (eval (add-atom-nodup $space ($num $result))))
-        )
-       $result
-        )
+       ($result (eval (deb2var $pattern ())))
+       (($varpat $list) $result)
+       )
+       $varpat
+    ))
 )
-
-($num $var)
-
-(= (replacev $pattern $space)
-    (map-atom $pattern $x (if (== (get-type $x) Nat) (generate $x $space) 
-                              (if (and (not (== (get-type $x) Nat)) 
-                               (== (get-metatype $x) Expression)) (replacev $x $space) $x))) ;
+(= (deb2var $pattern $history)
+    (if (== $pattern ())
+        (() $history)
+        (let* (
+        ($head (car-atom $pattern))
+        ($tail (cdr-atom $pattern))
+        ($history_val (find_val $history $head))
+        ($newhead  (if (== (get-type $head) Nat) 
+                        (if (== $history_val ())
+                          (let $newvar (make_var) ($newvar (union-atom (($head $newvar)) $history)))
+                          ($history_val $history)
+                        ) 
+                        (if (and (not (== (get-type $head) Nat)) (== (get-metatype $head) Expression))
+                          (deb2var $head $history)
+                          ($head $history)
+                        )
+                    ))
+        (($var $new_history) $newhead)
+        ($newtail (deb2var $tail $new_history))
+        (($rest $final_history) $newtail)
+    )
+        ((cons-atom $var $rest) $final_history)
+        )
+    )
 )
-
-; (= (replacev-helper $x) (
-;     if (== (get-type $x) Nat) (generate $x) 
-;                                (if (and (not (== (get-type $x) Nat)) 
-;                                (== (get-metatype $x) Expression)) (replacev $x) $x)
-; ))
-
-; (= (replacev $pattern) 
-;     ( replacev-helper (superpose $pattern)
-; ))
 
 (= (num2deb $pattern)
     (map-atom $pattern $x (if (== (get-type $x) Number) (fromNum $x) (if (and (not (== (get-type $x) Number)) (== (get-metatype $x) Expression)) (num2deb $x) $x)))
@@ -53,73 +67,66 @@
 
 
 (= (replace $pattern)
-(let* (
+    (if (== $pattern ())
+        ()
+    (let* (
        ($result (eval (var2num $pattern 0 ())))
        (($numpat $index $list) $result)
        ($deb (num2deb $numpat))
        )
-       $deb))
-
-       
-(= (var2num () $index $list)
-    (() $index $list) ; Return the empty list, current index, and list
+       $deb
+    ))
 )
 
+       
 (= (check $list $var)
    (if (== $list ())
         False
         (if (== $var (car-atom $list))
             True
-            (check  (cdr-atom $list) $var))
+            (check (cdr-atom $list) $var))
     )
 )
 
-(= (find_index () $var $index)
-    ()
-)
-
 (= (find_index $list $var $index)
-    (let* (
+    (if (== $list ())
+        ()
+        (let* (
         ($head (car-atom $list))
         ($tail (cdr-atom $list))
         ($res (if (== $head $var) $index (find_index $tail $var (+ $index 1))))
     )
     $res
     )
+    )
 )
 
-(= (var2num-helper $head $index $list $is_expr $is_var $check  )  (if $is_expr
-                                           (var2num $head $index $list) ; Recursive call for sub-expression
-                                        (if $is_var
-                                            (if $check
-                                                ((find_index $list $head 0) $index $list) ; Return existing index, current index, and list
-                                                ;($index (+ $index 1) (union-atom $list ($head))) ; Return new index, incremented index, and updated list
-                                                False
-                                              )
-                                            ($head $index $list) ; Not a var or expr, return head, current index, and list
-                                        )
-                                    ))
-
-(= (var2num $pattern $index $list) 
+(= (var2num $pattern $index $list)
+    (if (== $pattern ())
+        (() $index $list)
         (let* (
             ($head (car-atom $pattern))
             ($tail (cdr-atom $pattern))    
             ($is_var (==  (get-metatype $head) Variable))
             ($is_expr (==  (get-metatype $head) Expression))
-            (true (println! (expr $is_expr $head)))
             ($check (check $list $head))
-            (true (println! (ck $check $list)))
-            ($processed_head_and_index  (var2num-helper $head $index $list $is_expr $is_var $check  ) )
-         ;   (($res_head0 $new_index0 $new_list0) $processed_head_and_index)
-            (true (println! (==== $processed_head_and_index)))
-       ;     ($here ($index (+ $index 1) (union-atom $list ($head))) )
-            (($res_head $new_index $new_list) (if  (== False $processed_head_and_index) 
-                                                   ($index (+ $index 1) (union-atom $list ($head)))  $processed_head_and_index))
-            
+            ($processed_head_and_index (eval (if $is_expr
+                                        (var2num $head $index $list) ; Recursive call for sub-expression
+                                        (if $is_var
+                                            (if $check
+                                                ((find_index $list $head 0) $index $list) ; Return existing index, current index, and list
+                                                ($index (+ $index 1) (union-atom $list ($head))) ; Return new index, incremented index, and updated list
+                                              )
+                                            ($head $index $list) ; Not a var or expr, return head, current index, and list
+                                        )
+                                    )))
+
+            (($res_head $new_index $new_list) $processed_head_and_index)            
             ($processed_tail_and_index (var2num $tail $new_index $new_list)) ; Recursive call for tail with updated index and list
             (($res_tail $final_index $final_list) $processed_tail_and_index)
 
         )
         ((cons-atom $res_head $res_tail) $final_index $final_list)
-        )   
+        )
+    )
 )

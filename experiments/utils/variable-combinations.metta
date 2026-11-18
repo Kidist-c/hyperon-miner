@@ -2,48 +2,91 @@
 (= (is-var-in-list $var $list) (if (== $list ()) False (let $head (car-atom $list) (if (== $var $head) True (is-var-in-list $var (cdr-atom $list))))))
 
 
-; Generate combinations of variables
-(= (combine-vars $vars $count $combinations) 
-    (let* (
-        ($tmp-vars (superpose $vars))
-        ($tmp-combinations (if (== (car-atom ($combinations)) ()) () (superpose $combinations)))
-        ($new-pattern (cons-atom $tmp-vars $tmp-combinations)))
-        (if (== $count 1) $new-pattern (combine-vars $vars (- $count 1) (collapse $new-pattern)))))
-
 ; Check if variables from one list exist in another list
-(= (vars-exist $list1 $list2) (if (== $list1 ()) False (let $head (car-atom $list1) (if (is-var-in-list $head $list2) True (vars-exist (cdr-atom $list1) $list2)))))
+(= (exist $list1 $list2) 
+    (if (== $list1 ())
+         False 
+         (let $head (car-atom $list1) (if (is-var-in-list $head $list2) True (exist (cdr-atom $list1) $list2)))))
+
+(= (vars-exist $combinations $vars)
+    (if (== $combinations ())
+        ()
+        (let* (
+                ($head-comb (car-atom $combinations))
+                ($tail-comb (cdr-atom $combinations))
+                ($check (exist $head-comb $vars))
+                ($res (if $check $head-comb Empty))
+                ($rest (vars-exist $tail-comb $vars))
+              )
+            (cons-atom $res $rest)
+        )
+    )
+)
+
+; (= (combiner-pat1-pat2 $vars () $accum)
+;    $accum
+; )
+; (= (combiner-pat1-pat2 $vars $pat2 $accum)
+;   (superpose (
+;     ;; Option 1: keep the slot
+;     (combiner-pat1-pat2 $vars (cdr-atom $pat2) (union-atom $accum ((car-atom $pat2))))
+;     ;; Option 2: replace with each var
+;     (combiner-pat1-pat2 $vars (cdr-atom $pat2) (union-atom $accum ((superpose $vars))))
+
+;   ))
+; )
+;; Update 1: Add $full-vars to arguments
+(= (try-replace $vars-to-iterate $full-vars $rest-pat2 $current $results)
+   (if (== $vars-to-iterate ())
+       $results
+       (let* (
+              ($var       (car-atom $vars-to-iterate))
+              ($rest-vars (cdr-atom $vars-to-iterate))
+              ($so-far $results)
+
+              ;; Update 2: Pass $full-vars to combiner-all, NOT $vars-to-iterate
+              ($after-this-var
+                   (combiner-all $full-vars $rest-pat2
+                                 (union-atom $current ($var))
+                                 $so-far)) 
+              
+              ;; Update 3: Pass $full-vars along to the next recursive step
+              ($final (try-replace $rest-vars $full-vars $rest-pat2 $current $after-this-var))
+             )
+         $final)))
+
+(= (combiner-all $vars $pat2 $current $results)
+   (if (== $pat2 ())
+       (cons-atom $current $results)
+       (let* (
+              ($slot      (car-atom $pat2))
+              ($rest-pat2 (cdr-atom $pat2))
+
+              ;; 1. Keep original slot
+              ($next_current (union-atom $current ($slot)))
+              ($after-keep
+                   (combiner-all $vars $rest-pat2
+                                 $next_current
+                                 $results))
+              
+              ;; 2. Replace this position
+              ;; Update 4: Pass $vars TWICE. 
+              ;; Once as the list to iterate, once as the full master list.
+              ($final (try-replace $vars $vars $rest-pat2 $current $after-keep))
+             )
+         $final
+         )))
+
+;; Entry point remains mostly the same
 
 
 ; Get filtered combinations of variables
-(= (get-filtered-combinations $all-vars $vars1 $vars2 $length) 
+(= (combine_lists $vars1 $vars2) 
     (let* (
-        ($combinations (combine-vars $all-vars $length ()))
-        ($vars1-check (if (vars-exist $combinations $vars1) $combinations Empty))
-        ($vars2-check (if (vars-exist $combinations $vars2) $combinations Empty))
-    ) $combinations
-))
+        ($combinations (combiner-all $vars1 $vars2 () ()))
+        ($vars1-check (vars-exist $combinations $vars1))
+    ) $vars1-check
+    )
+)
 
 
-(= (create-variables $all-vars $cleared) (
-    if (== $all-vars ()) $cleared (let $head (car-atom $all-vars ) (if (is-var-in-list $head $cleared) (create-variables (cdr-atom $all-vars) $cleared) (create-variables (cdr-atom $all-vars) (cons-atom $head $cleared))))
-))
-
-
-; Create combinations of variables from two patterns
-(= (combine_lists $vars1 $vars2)
-    (let* (
-        ($all-vars1 (union-atom $vars1 $vars2))
-        ($all-vars (create-variables $all-vars1 ()))
-        ($length (tuple-count $vars2))
-    ) (if (== $length 1) $vars1 (get-filtered-combinations $all-vars $vars1 $vars2 $length))
-))
-
-
-; !(experimenting with the second pattern that has 1 variable)
-; !(combine_lists (link AAA $BBB) (link CCC $CCC))
-
-; !(experimenting with the second pattern that has 2 variables)
-; !(combine_lists (link  $AAA $BBB ) (link $BB $AA))
-
-; !(experimenting with the second pattern that has 3 variables)
-; !(combine_lists (link $AAA $BBB) (link $AA (link1 $CCC $DDD)))

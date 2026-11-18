@@ -1,37 +1,19 @@
 !(import! &self ../../utils/common-utils)
-!(import! &self ../../utils/partition-metta)
-!(import! &self ../../utils/binomialMetta)
-!(import! &self ../../utils/surp-utils)
-!(import! &self ../../utils/beta-dist)
-!(import! &self ../../utils/index_to_var)
-!(import! &self ../../utils/blk-abstractness)
-!(import! &self ../../utils/eq-prob-petta)
-!(import! &self ../../utils/constants)
+!(import! &self ../../utils/surp-utils/partition-metta)
+!(import! &self ../../utils/surp-utils/binomialMetta)
+!(import! &self ../../utils/surp-utils/surp-utils)
+!(import! &self ../../utils/surp-utils/beta-dist)
+!(import! &self ../../utils/surp-utils/blk-abstractness)
+!(import! &self ../../utils/surp-utils/eq-prob-petta)
+!(import! &self ../../utils/surp-utils/bs-utils)
 !(import! &self ../../utils/TruthValue)
-!(import! &self ../../utils/bs-utils)
+!(import! &self ../../utils/constants)
 !(import! &self ../../truth-values/emp-tv)
 !(import! &self ../../truth-values/est-tv)
-!(import! &self ../../data/ugly_man_sodaDrinker)
+!(import! &self ../../utils/index_to_var)
+!(import! &kb ../../data/ugly_man_sodaDrinker)
 !(import! &self ../emp-prob)
 !(import! &self ../isurp)
-
-
-
-(migrateAtoms (-> %Undefined% %Undefined% Expression %Undefined%))
-(= (migrateAtoms $FromSpace $ToSpace $Pattern)
-   (collapse (match &self $Pattern  (collapse ((add-atom &kb $Pattern) 
-                          (remove-atom &self $Pattern))))))
-
-!(migrateAtoms &self &kb (Inheritance $a $b))
-!(===================================)
-;  ! (import! &kb experiments:data:nested_coupled:mock_coupled)
-
-
-
-
-
-
-
 
 
 
@@ -200,4 +182,44 @@
 
 
 
+;; test with n-arry format data
+!(import! &dbNarry ../../data/dataset_for_n_arry_format)
+;; inputs:-
+  ;; conjunctive pattern: (, (Inheritance $x Loves $y) (Inheritance $x $Interest $Venue) (Inheritance $y $Interest $Venue))
+  ;; db reference: dataset_for_n_arry_format
+  ;; ratio: 0.2
+  ;; normalization: True
+!(assertEqual (isurp (, 
+   (Inheritance $x Loves $y) 
+   (Inheritance $x $Interest $Venue) 
+   (Inheritance $y $Interest $Venue)) &dbNarry True 0.2) 0.9574829931972789)
 
+;; inputs:-
+  ;; conjunctive pattern: (, (Inheritance $x $y The-Slice-Shop) (Inheritance $x Pizza-Lover $place) (Inheritance $x Pizza-Lover The-Slice-Shop))
+  ;; db reference: dataset_for_n_arry_format
+  ;; ratio: 0.2
+  ;; normalization: True
+!(assertEqual (isurp (, 
+   (Inheritance $_32506 $_32512 The-Slice-Shop) 
+   (Inheritance $_32506 Pizza-Lover $_32548) 
+   (Inheritance $_32506 Pizza-Lover The-Slice-Shop)) &dbNarry True 0.2) 0.7857142857142857)
+
+;; inputs:-
+  ;; conjunctive pattern: (, (Inheritance $x Loves $y) (Inheritance $x $Interest $Venue) (Inheritance $y $Interest $Venue))
+  ;; db reference: dataset_for_n_arry_format
+  ;; ratio: 0.2
+  ;; normalization: False
+!(assertEqual (isurp (, 
+   (Inheritance $x Loves $y) 
+   (Inheritance $x $Interest $Venue) 
+   (Inheritance $y $Interest $Venue)) &dbNarry False 0.2) 0.0005234054263104659)
+
+;; inputs:-
+  ;; conjunctive pattern: (, (Inheritance $x $y The-Slice-Shop) (Inheritance $x Pizza-Lover $place) (Inheritance $x Pizza-Lover The-Slice-Shop))
+  ;; db reference: dataset_for_n_arry_format
+  ;; ratio: 0.2
+  ;; normalization: False
+!(assertEqual (isurp (, 
+   (Inheritance $_32506 $_32512 The-Slice-Shop) 
+   (Inheritance $_32506 Pizza-Lover $_32548) 
+   (Inheritance $_32506 Pizza-Lover The-Slice-Shop)) &dbNarry False 0.2) 0.0002147542690545606)
