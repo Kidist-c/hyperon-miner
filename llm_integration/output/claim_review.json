@@ -1,0 +1,20 @@
+[
+    {
+        "record": 1,
+        "pattern": "(, (Inheritance $_0 $_1) (Inheritance $_0 $_2))",
+        "review_status": "No lexical risks detected",
+        "findings": []
+    },
+    {
+        "record": 2,
+        "pattern": "(, (Inheritance $_0 $_1) (Inheritance $_2 $_1))",
+        "review_status": "No lexical risks detected",
+        "findings": []
+    },
+    {
+        "record": 3,
+        "pattern": "(, (Inheritance $_0 $_1) (Inheritance $_0 human))",
+        "review_status": "No lexical risks detected",
+        "findings": []
+    }
+]
