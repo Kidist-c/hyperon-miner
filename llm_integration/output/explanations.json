@@ -11,7 +11,18 @@
       "(, (Inheritance Lily ugly) (Inheritance Lily ugly))",
       "(, (Inheritance Kecia sodaDrinker) (Inheritance Kecia sodaDrinker))"
     ],
-    "explanation": "### Pattern\nThe pattern consists of a conjunction of two `Inheritance` predicates sharing the first argument variable `$_0`.\n\n### Explanation\nBoth predicates use the same first argument, `$_0`. The second arguments, `$_1` and `$_2`, are distinct variables. This structure identifies cases where a single first argument appears in two `Inheritance` relations.\n\n### Evidence\nFive records are sampled from 190 total reported support. The sample shows first arguments like `Allen`, `Breonna`, and `Emily`. Some records have identical second arguments (e.g., `human`), while others differ (e.g., `human` and `sodaDrinker`).\n\n### Limitations\nThe sample does not represent all 190 matches. No causal or hierarchical meaning is inferred from the predicate name. The specific semantic roles of the arguments are not established by the provided data."
+    "explanation": "### Pattern\nThe pattern consists of a conjunction of two `Inheritance` predicates sharing the first argument variable `$_0`.\n\n### Explanation\nBoth predicates use the same first argument, `$_0`. The second arguments, `$_1` and `$_2`, are distinct variables. This structure identifies cases where a single first argument appears in two `Inheritance` relations.\n\n### Evidence\nFive records are sampled from 190 total reported support. The sample shows first arguments like `Allen`, `Breonna`, and `Emily`. Some records have identical second arguments (e.g., `human`), while others differ (e.g., `human` and `sodaDrinker`).\n\n### Limitations\nThe sample does not represent all 190 matches. No causal or hierarchical meaning is inferred from the predicate name. The specific semantic roles of the arguments are not established by the provided data.",
+    "provenance": {
+      "model": "qwen/qwen3.8-27b",
+      "prompt_version": "1.0",
+      "prompt_sha256": "26ddd33000bed751451f02f97846d7547ad9e2695534da245beb9f240c0e9ed1",
+      "generation_timestamp_utc": "2026-11-18T07:55:40.336494+00:00",
+      "sampling_strategy": "distributed_evidence_sampling",
+      "max_evidence": 5,
+      "actual_evidence_sample_count": 5,
+      "temperature": 0,
+      "max_completion_tokens": 500
+    }
   },
   {
     "pattern": "(, (Inheritance $_0 $_1) (Inheritance $_2 $_1))",
@@ -25,7 +36,18 @@
       "(, (Inheritance Kecia woman) (Inheritance Kecia woman))",
       "(, (Inheritance Kecia sodaDrinker) (Inheritance Kecia sodaDrinker))"
     ],
-    "explanation": "### Pattern\nThe pattern consists of a conjunction of two `Inheritance` predicates. Both predicates share the second argument, bound to variable `$_1`. The first arguments are distinct variables, `$_0` and `$_2`.\n\n### Explanation\nThis structure identifies pairs of `Inheritance` relations that share an identical second argument. The first arguments of the two predicates may be identical or distinct values. No specific semantic direction or hierarchy is implied by the predicate name alone.\n\n### Evidence\nThe sample contains 5 records out of 800 total reported support. Examples include `(Inheritance Allen human)` paired with itself, and `(Inheritance Lily human)` paired with `(Inheritance Allen human)`. These demonstrate cases where the second argument is identical across both predicates.\n\n### Limitations\nThe sample does not represent all 800 matches. No causal or hierarchical meaning can be inferred. The relationship between the first arguments is not constrained beyond being variables."
+    "explanation": "### Pattern\nThe pattern consists of two `Inheritance` predicates sharing the second argument variable `$_1`.\n\n### Explanation\nThe first argument of the first predicate is `$_0`, and the first argument of the second predicate is `$_2`. Both predicates share the identical value for their second argument. The pattern does not specify a relationship between `$_0` and `$_2`.\n\n### Evidence\nFive records are sampled from 800 total reported support. The sample shows pairs like `(Inheritance Allen human)` and `(Inheritance Allen human)`, or `(Inheritance Lily human)` and `(Inheritance Allen human)`. In all cases, the second argument remains constant within each pair.\n\n### Limitations\nThe sample does not represent all 800 matches. No causal or hierarchical meaning can be inferred from the predicate names. The relationship between the first arguments is not defined by the pattern.",
+    "provenance": {
+      "model": "qwen/qwen3.8-27b",
+      "prompt_version": "1.0",
+      "prompt_sha256": "866bb911affaed20cb34fad2cad2b751ac2e758a6fc86bbc91e51dfaabfd06a2",
+      "generation_timestamp_utc": "2026-11-18T07:55:41.734140+00:00",
+      "sampling_strategy": "distributed_evidence_sampling",
+      "max_evidence": 5,
+      "actual_evidence_sample_count": 5,
+      "temperature": 0,
+      "max_completion_tokens": 500
+    }
   },
   {
     "pattern": "(, (Inheritance $_0 $_1) (Inheritance $_0 human))",
@@ -39,6 +61,17 @@
       "(, (Inheritance Hessley ugly) (Inheritance Hessley human))",
       "(, (Inheritance Kecia sodaDrinker) (Inheritance Kecia human))"
     ],
-    "explanation": "### Pattern\nThe pattern consists of two `Inheritance` predicates sharing the first argument variable `$_0`. The second argument of the first predicate is variable `$_1`, while the second argument of the second predicate is the fixed symbol `human`.\n\n### Explanation\nThis structure identifies instances where a specific value appears as the first argument in two `Inheritance` relations. In both relations, the second argument differs: one is a variable `$_1` and the other is the constant `human`. The shared variable `$_0` links the two predicates, indicating that the same first argument participates in both inheritance statements.\n\n### Evidence\nThe sample contains 5 records out of 60 total reported support. Examples include `(Inheritance Allen human)` paired with itself, and `(Inheritance Lily woman)` paired with `(Inheritance Lily human)`. The first argument varies across records (e.g., Allen, Breonna, Lily), while the second argument of the second predicate remains `human`.\n\n### Limitations\nThe sample does not represent all 60 matches. No causal or hierarchical meaning can be inferred from the predicate names. The semantic roles of the arguments are not defined by the pattern alone."
+    "explanation": "### Pattern\nThe pattern consists of two `Inheritance` predicates sharing the first argument variable `$_0`. The second argument of the first predicate is variable `$_1`, while the second argument of the second predicate is the fixed symbol `human`.\n\n### Explanation\nThis structure identifies instances where a specific value appears as the first argument in two `Inheritance` relations. In both relations, the second argument differs: one is a variable `$_1` and the other is the constant `human`. The shared variable `$_0` links the two predicates, indicating that the same first argument participates in both inheritance statements.\n\n### Evidence\nThe sample contains 5 records out of 60 total reported support. Examples include `(Inheritance Allen human)` paired with itself, and `(Inheritance Lily woman)` paired with `(Inheritance Lily human)`. The first argument varies across records (e.g., Allen, Breonna, Lily), while the second argument of the second predicate remains `human`.\n\n### Limitations\nThe sample does not represent all 60 matches. No causal or hierarchical meaning can be inferred from the predicate names. The semantic roles of the arguments are not defined by the pattern alone.",
+    "provenance": {
+      "model": "qwen/qwen3.8-27b",
+      "prompt_version": "1.0",
+      "prompt_sha256": "59e9d2a528c4da5141c882eacf1b4a12e9b36196a8f0a21801b43e2a60b645a7",
+      "generation_timestamp_utc": "2026-11-18T07:55:42.561083+00:00",
+      "sampling_strategy": "distributed_evidence_sampling",
+      "max_evidence": 5,
+      "actual_evidence_sample_count": 5,
+      "temperature": 0,
+      "max_completion_tokens": 500
+    }
   }
 ]

@@ -1,6 +1,8 @@
 
 import json
 import os
+import hashlib
+from datetime import datetime, timezone
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -37,11 +39,18 @@ OUTPUT_FILE = (
     / "explanations.json"
 )
 
+# LLM configuration
 MODEL = "qwen/qwen3.8-27b"
 
 MAX_PATTERNS = 3
 MAX_EVIDENCE = 5
 MAX_COMPLETION_TOKENS = 500
+
+GENERATION_TEMPERATURE = 0
+
+# Provenance configuration
+PROMPT_VERSION = "1.0"
+SAMPLING_STRATEGY = "distributed_evidence_sampling"
 
 
 # --------------------------------------------------
@@ -147,6 +156,48 @@ def build_prompt(
 
 
 # --------------------------------------------------
+# PROVENANCE GENERATION
+# --------------------------------------------------
+
+def generate_provenance(
+    prompt_template,
+    evidence_sample
+):
+    """
+    Record the configuration and source information
+    used to generate an explanation.
+    """
+
+    prompt_hash = hashlib.sha256(
+        prompt_template.encode("utf-8")
+    ).hexdigest()
+
+    return {
+        "model": MODEL,
+
+        "prompt_version": PROMPT_VERSION,
+
+        "prompt_sha256": prompt_hash,
+
+        "generation_timestamp_utc": (
+            datetime.now(timezone.utc).isoformat()
+        ),
+
+        "sampling_strategy": SAMPLING_STRATEGY,
+
+        "max_evidence": MAX_EVIDENCE,
+
+        "actual_evidence_sample_count": len(
+            evidence_sample
+        ),
+
+        "temperature": GENERATION_TEMPERATURE,
+
+        "max_completion_tokens": MAX_COMPLETION_TOKENS
+    }
+
+
+# --------------------------------------------------
 # MAIN EXPLANATION PIPELINE
 # --------------------------------------------------
 
@@ -198,6 +249,7 @@ def main():
     print("Patterns selected:", len(items_to_explain))
     print("Maximum evidence per pattern:", MAX_EVIDENCE)
     print("Model:", MODEL)
+    print("Prompt version:", PROMPT_VERSION)
 
     # Process patterns
     for index, item in enumerate(
@@ -233,10 +285,16 @@ def main():
             len(evidence_sample)
         )
 
-        # Build prompt
+        # Build complete prompt
         prompt = build_prompt(
             prompt_template,
             item,
+            evidence_sample
+        )
+
+        # Generate provenance metadata
+        provenance = generate_provenance(
+            prompt,
             evidence_sample
         )
 
@@ -251,7 +309,7 @@ def main():
                         "content": prompt
                     }
                 ],
-                temperature=0,
+                temperature=GENERATION_TEMPERATURE,
                 max_tokens=MAX_COMPLETION_TOKENS
             )
 
@@ -285,17 +343,31 @@ def main():
         ).strip()
 
         if not explanation:
-            print("Empty explanation received. Skipping result.")
+            print(
+                "Empty explanation received. "
+                "Skipping result."
+            )
             continue
 
-        # Store result
+        # Store result with provenance
         result = {
             "pattern": item["pattern"],
+
             "reported_support": item["reported_support"],
-            "total_evidence_count": len(item["evidence"]),
-            "evidence_sample_count": len(evidence_sample),
+
+            "total_evidence_count": len(
+                item["evidence"]
+            ),
+
+            "evidence_sample_count": len(
+                evidence_sample
+            ),
+
             "evidence_sample": evidence_sample,
-            "explanation": explanation
+
+            "explanation": explanation,
+
+            "provenance": provenance
         }
 
         results.append(result)
@@ -328,6 +400,7 @@ def main():
                 response.usage.completion_tokens
             )
 
+        print("Provenance metadata recorded.")
         print("Result saved.")
 
     # Final summary
@@ -335,6 +408,7 @@ def main():
     print("PROCESSING SUMMARY")
     print("=" * 50)
 
+    print("Patterns selected:", len(items_to_explain))
     print("Patterns explained:", len(results))
 
     print(
